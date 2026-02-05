@@ -23,3 +23,7 @@ Environment Details:
 dan 2 server target untuk di monitoring:
 - 10.0.1.189 idm9-target1
 - 10.0.4.14  idm10-target2
+
+Operating System: Debian Linux 
+
+Prerequisites:
