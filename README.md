@@ -152,7 +152,7 @@ groups:
 ```
 
 5. Loki Setup & Configuration 
-file loki-config.yml
+file `loki-config.yml`
 ```bash
 auth_enabled: false
 
@@ -182,7 +182,7 @@ schema_config:
 ```
 
 6. Promtail Configuration
-File konfigurasi promtail ini butuh di implementasikan ke vm target atau Nodes. Copy it (file `promtail-config.yml`)
+   File konfigurasi promtail ini butuh di implementasikan ke vm target atau Nodes. Copy it (file `promtail-config.yml`)
 ```bash
 server:
   http_listen_port: 9080
@@ -204,3 +204,166 @@ scrape_configs:
           host: idm8-monitoring  # Change per server: idm8, idm9, idm10
           __path__: /var/log/*.log
 ```
+
+7. Prometheus Configuration file `prometheus.yml`
+```bash
+global:
+  scrape_interval: 15s
+
+rule_files:
+  - "rules/alerts.yml"
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  - job_name: node_exporter
+    static_configs:
+      - targets:
+          - 10.0.1.189 #idm9-target1
+          - 10.0.4.14 # idm10-target2
+          - 10.0.0.223 #idm8-monitoring
+```
+
+8. Alertmanager Configuration file alertmanager.yml
+```bash
+global:
+  resolve_timeout: 5m
+
+route:
+  receiver: 'default-receiver'
+
+receivers:
+  - name: 'default-receiver'
+```
+
+9. Docker Compose file
+```bash
+version: "3.8"
+
+services:
+  node-exporter:
+    image: prom/node-exporter
+    container_name: node-exporter
+    ports:
+      - "9100:9100"
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./rules:/etc/prometheus/rules
+    ports:
+      - "9090:9090"
+    depends_on:
+      - node-exporter
+    restart: unless-stopped
+
+  loki:
+    image: grafana/loki:2.9.0
+    container_name: loki
+    volumes:
+      - ./loki-config.yml:/etc/loki/config.yml
+      - ./loki/chunks:/loki/chunks
+      - ./loki/rules:/loki/rules
+    ports:
+      - "3100:3100"
+    restart: unless-stopped
+
+  alertmanager:
+    image: prom/alertmanager
+    container_name: alertmanager
+    volumes:
+      - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml
+    ports:
+      - "9093:9093"
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+      - loki
+    restart: unless-stopped
+```
+
+10. jalankan command berikut untuk menggunakan stack docker
+```bash
+docker compose up -d 
+```
+
+11. Check container status up or down
+```bash
+docker ps -a
+```
+
+12. Install Node Exporter and Promtail di `kedua vm nodes`
+```bash
+wget https://github.com/prometheus/node_exporter/releases/download/v1.10.2/node_exporter-1.10.2.linux-amd64.tar.gz
+tar xvfz node_exporter-1.10.2.linux-amd64.tar.gz
+sudo mv node_exporter-1.10.2.linux-amd64/node_exporter /usr/local/bin/
+```
+steps 2
+```bash
+sudo tee /etc/systemd/system/node_exporter.service <<EOF
+[Unit]
+Description=Prometheus Node Exporter
+After=network.target
+
+[Service]
+User=root
+ExecStart=/usr/local/bin/node_exporter
+
+[Install]
+WantedBy=default.target
+EOF
+```
+steps 3
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now node_exporter
+curl http://localhost:9100/metrics
+```
+steps 4 - download Promtail
+```bash
+wget https://github.com/grafana/loki/releases/download/v2.9.0/promtail-linux-amd64.zip
+sudo apt install unzip -y
+unzip promtail-linux-amd64.zip
+sudo mv promtail-linux-amd64 /usr/local/bin/promtail
+sudo chmod +x /usr/local/bin/promtail
+```
+steps 5 - promtail config (copy isi file `promtail-config-node.yml` and paste di promtail-config.yml milik nodes jangan ubah nama file. di repo hanya contoh )
+```bash
+sudo mkdir -p /root/monitoring_os/
+sudo vi /root/monitoring_os/promtail-config.yml
+```
+steps 6 - promtail systemd service 
+```bash
+sudo tee /etc/systemd/system/promtail.service <<EOF
+[Unit]
+Description=Promtail service
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/promtail -config.file /root/monitoring_os/promtail-config.yml
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+EOF
+```
+steps 7
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now promtail
+sudo journalctl -u promtail -f
+```
+
+13. Access URLs
+   Kita bisa akses monitoring GUI Grafana di host idm8-monitoring, menggunakan ip public karena saya menggunakan EC2 Instance AWS
