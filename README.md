@@ -368,3 +368,26 @@ sudo journalctl -u promtail -f
 13. Access URLs
    - Kita bisa akses monitoring GUI Grafana di host idm8-monitoring, menggunakan ip public karena saya menggunakan EC2 Instance AWS
    - Grafana (Dashboard & Visualization ): http://3.91.67.81:3000
+![grafana-ss](./images/image1.png)
+
+14. Prometheus (Metrics Collection & Target): http://3.91.67.81:9090
+![prometheus-ss](./images/image2.png)
+
+15. Loki (Log Aggregation): 
+```bash
+curl -s "http://3.91.67.81:3100/loki/api/v1/labels"
+```
+![loki-ss](/images/image3.png)
+
+16. Alert Manager (Alerts & Notifications): http://3.91.67.81:9093
+![alert-ss](./images/image4.png)
+
+17. Node Exporter (System Metrics in Plain text)
+![nodeexporter-ss](./images/image5.png)
+
+### Sekarang kita sudah berhasil mengakses semua container dan dapat melihat data serta logs nya.
+
+18. Grafana Setups
+    - Sekarang akses grafana dengan credentials default username `admin` dan password `admin`
+
+    
