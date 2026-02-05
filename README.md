@@ -182,7 +182,7 @@ schema_config:
 ```
 
 6. Promtail Configuration
-   File konfigurasi promtail ini butuh di implementasikan ke vm target atau Nodes. Copy it (file `promtail-config.yml`)
+  - File konfigurasi promtail ini butuh di implementasikan ke vm target atau Nodes. Copy it (file `promtail-config.yml`)
 ```bash
 server:
   http_listen_port: 9080
