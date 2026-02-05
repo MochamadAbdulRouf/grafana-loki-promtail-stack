@@ -390,4 +390,28 @@ curl -s "http://3.91.67.81:3100/loki/api/v1/labels"
 18. Grafana Setups
     - Sekarang akses grafana dengan credentials default username `admin` dan password `admin`
 
-    
+19. Add Prometheus Data Source: Navigate Connections -> Data Sources -> Add new data source -> prometheus url : http://10.0.0.223:9090 -> Click save & test
+![ss-gf-datasource](./images/image6.png)
+![ss-gf-test](./images/image7.png)
+
+20. Add Loki Data Source: Navigate Connection -> Data Sources -> Add new data source -> Loki URL : http://10.0.0.223:3100 Click Save & Test
+![ss-gf-loki](./images/image8.png)
+
+21. Kita bisa check semua target hosts
+![ss-check](./images/image9.png)
+
+22. Configuring the dashboard 
+    - CPU Usage Panel, Click menu Dashboard -> Create new Dashboard -> Add Visualization -> Klik prometheus 
+    ![ss-createdashboard](./images/image9.png)
+    - Query (Prometheus): 
+    ```bash
+    100 - (avg by(instance)(rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)
+    ```
+    legend: {{nodename}}
+    Unit: Percent (%)
+    Click: Apply
+    ![ss-created-panel](./images/image11.png)
+    - Save Dashboard -> Beri title -> Save
+    - Click Dasboatd menu -> Click save dashboard untuk save panel di dashboard -> klik save
+    - Click Title Dashboard
+    ![ss-panel-ds](./images/image12.png)
