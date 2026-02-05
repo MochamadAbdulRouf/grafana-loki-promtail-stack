@@ -41,3 +41,166 @@ Prerequisites:
 - 9090 (Prometheus | Metrics Collection)
 - 9093 (Alert Manager | Alerts and Notification)
 - 9100 (Node Exporter | System Metrics )
+
+## Implementation
+
+1. Steps Install Docker and Docker Compose
+```bash
+# Add Docker's official GPG key:
+sudo apt update
+sudo apt install ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+# Add the repository to Apt sources:
+sudo tee /etc/apt/sources.list.d/docker.sources <<EOF
+Types: deb
+URIs: https://download.docker.com/linux/debian
+Suites: $(. /etc/os-release && echo "$VERSION_CODENAME")
+Components: stable
+Signed-By: /etc/apt/keyrings/docker.asc
+EOF
+
+sudo apt update
+```
+- install steps 2
+```bash
+sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+```
+- install steps 3
+```bash
+sudo systemctl status docker
+sudo systemctl start docker
+sudo docker run hello-world
+```
+- remove container hello-world
+```bash
+sudo docker rm <container-id>
+```
+
+2. Create Project Directory and file with below command
+```bash
+sudo mkdir -p /root/monitoring_os/loki/chunks /root/monitoring_os/rules && sudo touch /root/monitoring_os/alertmanager.yml /root/monitoring_os/docker-compose.yml /root/monitoring_os/loki-config.yml /root/monitoring_os/prometheus.yml /root/monitoring_os/promtail-config.yml /root/monitoring_os/rules/alerts.yml
+```
+
+### File dan Konfigurasi untuk monitoring stack
+Di direktori /root/monitoring_os, kita mengelola berkas konfigurasi dan folder berikut:
+- docker-compose.yml – Menentukan semua layanan pemantauan: Grafana, Prometheus, Loki, Alertmanager, dan Node Exporter
+- alertmanager.yml – Konfigurasi untuk pengalihan peringatan dan penerima
+- prometheus.yml – Pengaturan global Prometheus, konfigurasi pengambilan data, dan aturan peringatan
+- promtail-config.yml – Konfigurasi Promtail untuk pengiriman log dari /var/log ke Loki
+- loki-config.yml – Konfigurasi Loki untuk penyimpanan log, pengindeksan, dan pengaturan server
+- rules/alerts.yml – Aturan peringatan Prometheus untuk penggunaan CPU, memori, dan disk
+- loki/chunks/ – Direktori untuk Loki menyimpan potongan log
+- loki/rules/ – Direktori untuk aturan Loki (jika ada)
+
+3. Prometheus Setup
+file `prometheus.yml`
+```bash
+global:
+  scrape_interval: 15s
+
+rule_files:
+  - "rules/alerts.yml"
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: node_exporter
+    static_configs:
+      - targets:
+          - 10.0.1.189      #idm9-target1
+          - 10.0.4.14      # idm10-target2
+          - 10.0.0.223      #idm8-monitoring
+```
+
+4. Alert Rules (rules/alerts.yml)
+file `/root/monitoring_os/rules/alerts.yml`
+```bash
+groups:
+  - name: system_alerts
+    rules:
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance)(rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High CPU Usage on {{ $labels.instance }}"
+          description: "CPU usage > 80% for more than 2 minutes."
+
+      - alert: HighMemoryUsage
+        expr: ((node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes) * 100 > 80
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High Memory Usage on {{ $labels.instance }}"
+          description: "Memory usage > 80% for more than 2 minutes."
+
+      - alert: HighDiskUsage
+        expr: ((node_filesystem_size_bytes{mountpoint="/"} - node_filesystem_avail_bytes{mountpoint="/"}) / node_filesystem_size_bytes{mountpoint="/"}) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High Disk Usage on {{ $labels.instance }}"
+          description: "Disk usage > 85% on root filesystem."
+```
+
+5. Loki Setup & Configuration 
+file loki-config.yml
+```bash
+auth_enabled: false
+
+server:
+  http_listen_port: 3100
+
+common:
+  path_prefix: /loki
+  storage:
+    filesystem:
+      chunks_directory: /loki/chunks
+      rules_directory: /loki/rules
+  replication_factor: 1
+  ring:
+    kvstore:
+      store: inmemory
+
+schema_config:
+  configs:
+    - from: 2020-10-24
+      store: boltdb-shipper
+      object_store: filesystem
+      schema: v11
+      index:
+        prefix: index_
+        period: 24h
+```
+
+6. Promtail Configuration
+File konfigurasi promtail ini butuh di implementasikan ke vm target atau Nodes. Copy it (file `promtail-config.yml`)
+```bash
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://10.0.0.223:3100/loki/api/v1/push  # Central Loki server
+
+scrape_configs:
+  - job_name: system-logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: varlogs
+          host: idm8-monitoring  # Change per server: idm8, idm9, idm10
+          __path__: /var/log/*.log
+```
