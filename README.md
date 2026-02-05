@@ -17,6 +17,9 @@ Berikut masing-masing role dari tools yg digunakan :
 
 Dengan menggunakan Docker, kita dapat mengimplementasikan semua alat ini dengan cepat tanpa perlu khawatir tentang ketergantungan atau perbedaan sistem operasi. Docker juga memudahkan untuk menskalakan pemantauan ke beberapa mesin virtual (VM), seperti server Infra, dengan menjalankan Promtail dan Node Exporter di setiap server.
 
+Architecture Overview :
+![architecture](./images/architecture.png)
+
 Environment Details:
 - Monitoring Host: <b>idm8-monitoring - 10.0.0.223 </b>  
 
@@ -27,3 +30,13 @@ dan 2 server target untuk di monitoring:
 <b>Operating System: `Debian Linux ` </b>
 
 Prerequisites:
+
+1. 1 Linux host untuk monitoring 2 server lainnya
+2. Docker and Docker Compose
+3. Internet Connectivity
+4. Port yg perlu terbuka :
+- 3000 (Grafana | Web Dashboard) 
+- 3100 (Loki | Log Aggregation)
+- 9090 (Prometheus | Metrics Collection)
+- 9093 (Alert Manager | Alerts and Notification)
+- 9100 (Node Exporter | System Metrics )
