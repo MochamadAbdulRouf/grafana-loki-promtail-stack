@@ -17,7 +17,7 @@ Berikut masing-masing role dari tools yg digunakan :
 
 Dengan menggunakan Docker, kita dapat mengimplementasikan semua alat ini dengan cepat tanpa perlu khawatir tentang ketergantungan atau perbedaan sistem operasi. Docker juga memudahkan untuk menskalakan pemantauan ke beberapa mesin virtual (VM), seperti server Infra, dengan menjalankan Promtail dan Node Exporter di setiap server.
 
-Architecture Overview :
+<center><b>Architecture Overview :</b></center>
 ![architecture](./images/architecture.png)
 
 Environment Details:
