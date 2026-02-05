@@ -434,3 +434,12 @@ curl -s "http://3.91.67.81:3100/loki/api/v1/labels"
 - Configure notifications -> contact point `grafana-default-email` -> Click Save
 ![ss-detail1](./images/image16.png)
 ![ss-detail2](./images/image17.png)
+
+
+## DOKUMENTASI PROJECT
+![doc-1](./images/Screenshot_1.png)
+![doc-2](./images/Screenshot_2.png)
+![doc-3](./images/Screenshot_3.png)
+![doc-4](./images/Screenshot_4.png)
+![doc-5](./images/Screenshot_5.png)
+![doc-6](./images/Screenshot_6.png)
