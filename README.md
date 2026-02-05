@@ -415,3 +415,22 @@ curl -s "http://3.91.67.81:3100/loki/api/v1/labels"
     - Click Dasboatd menu -> Click save dashboard untuk save panel di dashboard -> klik save
     - Click Title Dashboard
     ![ss-panel-ds](./images/image12.png)
+
+23. Untuk membuat panel lengkap, bisa pakai import file `.json` yg udh saya upload dengan name file `template-dashboard.json`, 
+- Click Dashboard menu -> Click import .
+![import-dashboard](./images/image13.png) 
+- Paste code json di kolom `Import via dashboard JSON model` -> Klik Load -> optional ganti title -> klik import
+![import-json-dashboard](./images/image14.png)
+- Seperti ini tampilannya, nanti bisa edit panelnya untuk melihat query nya dan option lainnya
+![full-dashboard](./images/image15.png)
+
+24. Konfigurasi Alert Based, untuk memberikan notif alert ketika sistem seperti CPU yang traffic nya naik, dan menyebabkan server bisa down.
+- Click + New Alert rule -> isi name `Test memory 5%` -> Define query pilih prometheus lalu masukan query berikut -> Click Run Queries
+  ```bash
+  100 * (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes))
+  ```
+- Click + New Folder -> isi name `alert` -> Click New evaluation group -> isi `Every` lalu intervalnya 1m -> Click create 
+- Pending period 1m -> keep firing for none 
+- Configure notifications -> contact point `grafana-default-email` -> Click Save
+![ss-detail1](./images/image16.png)
+![ss-detail2](./images/image17.png)
