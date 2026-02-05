@@ -18,12 +18,12 @@ Berikut masing-masing role dari tools yg digunakan :
 Dengan menggunakan Docker, kita dapat mengimplementasikan semua alat ini dengan cepat tanpa perlu khawatir tentang ketergantungan atau perbedaan sistem operasi. Docker juga memudahkan untuk menskalakan pemantauan ke beberapa mesin virtual (VM), seperti server Infra, dengan menjalankan Promtail dan Node Exporter di setiap server.
 
 Environment Details:
-- Monitoring Host: idm8-monitoring - 10.0.0.223  
+- Monitoring Host: <b>idm8-monitoring - 10.0.0.223 </b>  
 
 dan 2 server target untuk di monitoring:
 - 10.0.1.189 idm9-target1
 - 10.0.4.14  idm10-target2
 
-Operating System: Debian Linux 
+Operating System: `Debian Linux `
 
 Prerequisites:
