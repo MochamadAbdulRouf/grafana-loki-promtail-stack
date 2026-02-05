@@ -402,14 +402,14 @@ curl -s "http://3.91.67.81:3100/loki/api/v1/labels"
 
 22. Configuring the dashboard 
     - CPU Usage Panel, Click menu Dashboard -> Create new Dashboard -> Add Visualization -> Klik prometheus 
-    ![ss-createdashboard](./images/image9.png)
+    ![ss-createdashboard](./images/image10.png)
     - Query (Prometheus): 
     ```bash
     100 - (avg by(instance)(rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)
     ```
-    legend: {{nodename}}
-    Unit: Percent (%)
-    Click: Apply
+    - legend: {{nodename}}
+    - Unit: Percent (%)
+    - Click: Apply
     ![ss-created-panel](./images/image11.png)
     - Save Dashboard -> Beri title -> Save
     - Click Dasboatd menu -> Click save dashboard untuk save panel di dashboard -> klik save
