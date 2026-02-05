@@ -21,9 +21,9 @@ Environment Details:
 - Monitoring Host: <b>idm8-monitoring - 10.0.0.223 </b>  
 
 dan 2 server target untuk di monitoring:
-- 10.0.1.189 idm9-target1
-- 10.0.4.14  idm10-target2
+- <b>10.0.1.189 idm9-target1</b>
+- <b>10.0.4.14  idm10-target2</b>
 
-Operating System: `Debian Linux `
+<b>Operating System: `Debian Linux ` </b>
 
 Prerequisites:
