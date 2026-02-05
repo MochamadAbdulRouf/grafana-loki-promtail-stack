@@ -367,3 +367,4 @@ sudo journalctl -u promtail -f
 
 13. Access URLs
    - Kita bisa akses monitoring GUI Grafana di host idm8-monitoring, menggunakan ip public karena saya menggunakan EC2 Instance AWS
+   - Grafana (Dashboard & Visualization ): http://3.91.67.81:3000
